@@ -20,7 +20,7 @@
 
 [versions]
 error_prone_annotations = "2.43.0"
-jetbrains-annotations = "26.0.2"
+jetbrains-annotations = "26.0.2-1"
 jspecify = "1.0.0"
 paper = "1.20.2-R0.1-SNAPSHOT" # Server version.
 run-paper = "3.0.2"
