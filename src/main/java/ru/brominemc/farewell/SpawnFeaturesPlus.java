@@ -215,6 +215,7 @@ final class SpawnFeaturesPlus implements Listener {
         }
         fall.addPassenger(player);
         player.playSound(LAUNCH_SOUND);
+        player.setAllowFlight(true);
         player.setFlying(true);
     }
 }
