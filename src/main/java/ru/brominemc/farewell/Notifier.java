@@ -369,15 +369,21 @@ final class Notifier implements Listener {
         // Check if teleported to spawn.
         if (!ALLEGED_SPAWN.equals(event.getTo())) return; // Implicit NPE for 'event'
 
-        // Clear old books.
-        Player player = event.getPlayer();
-        PlayerInventory inv = player.getInventory();
-        inv.remove(Material.WRITTEN_BOOK);
+        // Schedule a second later.
+        this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
+            // Check if no longer at spawn.
+            Player player = event.getPlayer();
+            if (!SpawnWorldHolder.SPAWN_WORLD.equals(player.getWorld())) return;
 
-        // Select and give the book.
-        String language = player.locale().toString().toLowerCase(Locale.ROOT);
-        ItemStack book = (RUSSIAN_LANGUAGES.contains(language) ? BOOK_ITEM_RU : BOOK_ITEM_EN);
-        inv.addItem(book);
+            // Clear old books.
+            PlayerInventory inv = player.getInventory();
+            inv.remove(Material.WRITTEN_BOOK);
+
+            // Select and give the book.
+            String language = player.locale().toString().toLowerCase(Locale.ROOT);
+            ItemStack book = (RUSSIAN_LANGUAGES.contains(language) ? BOOK_ITEM_RU : BOOK_ITEM_EN);
+            inv.addItem(book);
+        }, Ticks.TICKS_PER_SECOND);
     }
 
     /**
