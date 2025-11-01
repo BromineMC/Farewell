@@ -1,0 +1,160 @@
+advancements:
+  disable-saving: true
+  disabled:
+  - '*'
+commands:
+  log: true
+  replace-commands: []
+  send-namespaced: false
+  silent-commandblock-console: false
+  spam-exclusions: []
+  tab-complete: 2147483647
+config-version: 12
+messages:
+  outdated-client: Outdated client! Please use {0}
+  outdated-server: Outdated server! I'm still on {0}
+  restart: Server is restarting
+  server-full: The server is full!
+  unknown-command: Unknown command. Type "/help" for help.
+  whitelist: You are not whitelisted on this server!
+players:
+  disable-saving: true
+settings:
+  attribute:
+    attackDamage:
+      max: 0.0
+    maxHealth:
+      max: 20.0
+    movementSpeed:
+      max: 1.0
+  bungeecord: false
+  debug: true
+  log-named-deaths: true
+  log-villager-deaths: true
+  moved-too-quickly-multiplier: 10.0
+  moved-wrongly-threshold: 0.0625
+  netty-threads: 4
+  player-shuffle: 0
+  restart-on-crash: false
+  restart-script: ''
+  sample-count: 0
+  save-user-cache-on-stop-only: true
+  timeout-time: 10
+  user-cache-size: 1000
+stats:
+  disable-saving: true
+  forced-stats: {}
+world-settings:
+  default:
+    arrow-despawn-rate: 0
+    below-zero-generation-in-existing-chunks: false
+    dragon-death-sound-radius: 1
+    enable-zombie-pigmen-portal-spawns: false
+    end-portal-sound-radius: 1
+    entity-activation-range:
+      animals: 1
+      flying-monsters: 1
+      ignore-spectators: true
+      misc: 1
+      monsters: 1
+      raiders: 1
+      tick-inactive-villagers: false
+      villagers: 1
+      villagers-active-for-panic: false
+      villagers-work-immunity-after: 0
+      villagers-work-immunity-for: 0
+      wake-up-inactive:
+        animals-every: 0
+        animals-for: 0
+        animals-max-per-tick: 0
+        flying-monsters-every: 0
+        flying-monsters-for: 0
+        flying-monsters-max-per-tick: 0
+        monsters-every: 0
+        monsters-for: 0
+        monsters-max-per-tick: 0
+        villagers-every: 0
+        villagers-for: 0
+        villagers-max-per-tick: 0
+      water: 1
+    entity-tracking-range:
+      animals: 16
+      display: 64
+      misc: 8
+      monsters: 24
+      other: 64
+      players: 64
+    growth:
+      bamboo-modifier: 0
+      beetroot-modifier: 0
+      cactus-modifier: 0
+      cane-modifier: 0
+      carrot-modifier: 0
+      cavevines-modifier: 0
+      cocoa-modifier: 0
+      glowberry-modifier: 0
+      kelp-modifier: 0
+      melon-modifier: 0
+      mushroom-modifier: 0
+      netherwart-modifier: 0
+      pitcherplant-modifier: 0
+      potato-modifier: 0
+      pumpkin-modifier: 0
+      sapling-modifier: 0
+      sweetberry-modifier: 0
+      torchflower-modifier: 0
+      twistingvines-modifier: 0
+      vine-modifier: 0
+      weepingvines-modifier: 0
+      wheat-modifier: 0
+    hanging-tick-frequency: 2147483647
+    hopper-amount: 0
+    hopper-can-load-chunks: false
+    hunger:
+      combat-exhaustion: 0.0
+      jump-sprint-exhaustion: 0.0
+      jump-walk-exhaustion: 0.0
+      other-multiplier: 0.0
+      regen-exhaustion: 0.0
+      sprint-multiplier: 0.0
+      swim-multiplier: 0.0
+    item-despawn-rate: 0
+    max-tick-time:
+      entity: 1
+      tile: 1
+    max-tnt-per-tick: 1
+    merge-radius:
+      exp: 0.0
+      item: 0.0
+    mob-spawn-range: 0
+    nerf-spawner-mobs: true
+    seed-ancientcity: 69
+    seed-buriedtreasure: 69
+    seed-desert: 69
+    seed-endcity: 69
+    seed-fossil: 69
+    seed-igloo: 69
+    seed-jungle: 69
+    seed-mansion: 69
+    seed-mineshaft: 69
+    seed-monument: 69
+    seed-nether: 69
+    seed-ocean: 69
+    seed-outpost: 69
+    seed-portal: 69
+    seed-shipwreck: 69
+    seed-slime: 69
+    seed-stronghold: 69
+    seed-swamp: 69
+    seed-trailruins: 69
+    seed-village: 69
+    simulation-distance: default
+    thunder-chance: 0
+    ticks-per:
+      hopper-check: 2147483647
+      hopper-transfer: 2147483647
+    trident-despawn-rate: 0
+    verbose: false
+    view-distance: default
+    wither-spawn-sound-radius: 1
+    zombie-aggressive-towards-villager: false

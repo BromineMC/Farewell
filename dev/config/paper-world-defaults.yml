@@ -1,0 +1,277 @@
+# This is the world defaults configuration file for Paper.
+# As you can see, there's a lot to configure. Some options may impact gameplay, so use
+# with caution, and make sure you know what each option does before configuring.
+# 
+# If you need help with the configuration or have any questions related to Paper,
+# join us in our Discord or check the docs page.
+# 
+# Configuration options here apply to all worlds, unless you specify overrides inside
+# the world-specific config file inside each world folder.
+# 
+# Docs: https://docs.papermc.io/
+# Discord: https://discord.gg/papermc
+# Website: https://papermc.io/
+
+_version: 30
+anticheat:
+  anti-xray:
+    enabled: false
+    engine-mode: 1
+    hidden-blocks: []
+    lava-obscures: false
+    max-block-height: 0
+    replacement-blocks: []
+    update-radius: 0
+    use-permission: false
+  obfuscation:
+    items:
+      hide-durability: true
+      hide-itemmeta: true
+      hide-itemmeta-with-visual-effects: true
+chunks:
+  auto-save-interval: default
+  delay-chunk-unloads-by: 10s
+  entity-per-chunk-save-limit:
+    arrow: -1
+    ender_pearl: -1
+    experience_orb: -1
+    fireball: -1
+    small_fireball: -1
+    snowball: -1
+  fixed-chunk-inhabited-time: 0
+  flush-regions-on-save: false
+  max-auto-save-chunks-per-tick: 6
+  prevent-moving-into-unloaded-chunks: true
+collisions:
+  allow-player-cramming-damage: true
+  allow-vehicle-collisions: false
+  fix-climbing-bypassing-cramming-rule: true
+  max-entity-collisions: 0
+  only-players-collide: true
+entities:
+  armor-stands:
+    do-collision-entity-lookups: false
+    tick: false
+  behavior:
+    allow-spider-world-border-climbing: false
+    baby-zombie-movement-modifier: 0.0
+    disable-chest-cat-detection: true
+    disable-creeper-lingering-effect: true
+    disable-player-crits: true
+    door-breaking-difficulty:
+      husk: []
+      vindicator: []
+      zombie: []
+      zombie_villager: []
+      zombified_piglin: []
+    ender-dragons-death-always-places-dragon-egg: false
+    experience-merge-max-value: -1
+    mobs-can-always-pick-up-loot:
+      skeletons: false
+      zombies: false
+    nerf-pigmen-from-nether-portals: true
+    parrots-are-unaffected-by-player-movement: false
+    phantoms-do-not-spawn-on-creative-players: true
+    phantoms-only-attack-insomniacs: true
+    phantoms-spawn-attempt-max-seconds: 2147483647
+    phantoms-spawn-attempt-min-seconds: 2147483647
+    piglins-guard-chests: false
+    pillager-patrols:
+      disable: true
+      spawn-chance: 0.0
+      spawn-delay:
+        per-player: false
+        ticks: 2147483647
+      start:
+        day: 2147483647
+        per-player: false
+    player-insomnia-start-ticks: 2147483647
+    should-remove-dragon: true
+    spawner-nerfed-mobs-should-jump: false
+    zombie-villager-infection-chance: 0.0
+    zombies-target-turtle-eggs: false
+  entities-target-with-follow-range: false
+  markers:
+    tick: false
+  mob-effects:
+    immune-to-wither-effect:
+      wither: true
+      wither-skeleton: true
+    spiders-immune-to-poison-effect: true
+    undead-immune-to-certain-effects: true
+  sniffer:
+    boosted-hatch-time: default
+    hatch-time: default
+  spawning:
+    all-chunks-are-slime-chunks: false
+    alt-item-despawn-rate:
+      enabled: false
+      items:
+        cobblestone: 300
+    count-all-mobs-for-spawning: false
+    creative-arrow-despawn-rate: '0'
+    despawn-ranges:
+      ambient:
+        hard: 1
+        soft: 1
+      axolotls:
+        hard: 1
+        soft: 1
+      creature:
+        hard: 1
+        soft: 1
+      misc:
+        hard: 1
+        soft: 1
+      monster:
+        hard: 1
+        soft: 1
+      underground_water_creature:
+        hard: 1
+        soft: 1
+      water_ambient:
+        hard: 1
+        soft: 1
+      water_creature:
+        hard: 1
+        soft: 1
+    disable-mob-spawner-spawn-egg-transformation: true
+    duplicate-uuid:
+      mode: SAFE_REGEN
+      safe-regen-delete-range: 32
+    filter-bad-tile-entity-nbt-from-falling-blocks: true
+    filtered-entity-tag-nbt-paths:
+    - Pos
+    - Motion
+    - SleepingX
+    - SleepingY
+    - SleepingZ
+    iron-golems-can-spawn-in-air: false
+    monster-spawn-max-light-level: 0
+    non-player-arrow-despawn-rate: '0'
+    per-player-mob-spawns: false
+    scan-for-legacy-ender-dragon: false
+    skeleton-horse-thunder-spawn-chance: 0.0
+    slime-spawn-height:
+      slime-chunk:
+        maximum: -128.0
+      surface-biome:
+        maximum: -128.0
+        minimum: -128.0
+    spawn-limits:
+      ambient: 0
+      axolotls: 0
+      creature: 0
+      monster: 0
+      underground_water_creature: 0
+      water_ambient: 0
+      water_creature: 0
+    wandering-trader:
+      spawn-chance-failure-increment: 0
+      spawn-chance-max: 0
+      spawn-chance-min: 0
+      spawn-day-length: 2147483647
+      spawn-minute-length: 2147483647
+    wateranimal-spawn-height:
+      maximum: -128
+      minimum: -128
+  tracking-range-y:
+    animal: default
+    display: default
+    enabled: false
+    misc: default
+    monster: default
+    other: default
+    player: default
+environment:
+  disable-explosion-knockback: true
+  disable-ice-and-snow: true
+  disable-teleportation-suffocation-check: true
+  disable-thunder: true
+  fire-tick-delay: 2147483647
+  frosted-ice:
+    delay:
+      max: 0
+      min: 0
+    enabled: false
+  generate-flat-bedrock: true
+  nether-ceiling-void-damage-height: -128
+  optimize-explosions: true
+  portal-create-radius: 0
+  portal-search-radius: 0
+  portal-search-vanilla-dimension-scaling: false
+  treasure-maps:
+    enabled: false
+    find-already-discovered:
+      loot-tables: 'true'
+      villager-trade: true
+  water-over-lava-flow-speed: 2147483647
+feature-seeds:
+  generate-random-seeds-for-all: false
+fishing-time-range:
+  maximum: 2147483647
+  minimum: 2147483647
+fixes:
+  disable-unloaded-chunk-enderpearl-exploit: true
+  falling-block-height-nerf: disabled
+  fix-items-merging-through-walls: false
+  prevent-tnt-from-moving-in-water: true
+  split-overstacked-loot: true
+  tnt-entity-height-nerf: 2147483647
+hopper:
+  cooldown-when-full: true
+  disable-move-event: true
+  ignore-occluding-blocks: true
+lootables:
+  auto-replenish: false
+  max-refills: -1
+  refresh-max: 2d
+  refresh-min: 12h
+  reset-seed-on-fill: true
+  restrict-player-reloot: true
+  restrict-player-reloot-time: disabled
+maps:
+  item-frame-cursor-limit: 1
+  item-frame-cursor-update-interval: 2147483647
+max-growth-height:
+  bamboo:
+    max: 1
+    min: 1
+  cactus: 1
+  reeds: 1
+misc:
+  disable-end-credits: true
+  disable-relative-projectile-velocity: true
+  disable-sprint-interruption-on-attack: true
+  light-queue-size: 120
+  max-leash-distance: 0.0
+  redstone-implementation: ALTERNATE_CURRENT
+  shield-blocking-delay: 5
+  show-sign-click-command-failure-msgs-to-player: false
+  update-pathfinding-on-block-update: false
+scoreboards:
+  allow-non-player-entities-on-scoreboards: false
+  use-vanilla-world-scoreboard-name-coloring: false
+spawn:
+  allow-using-signs-inside-spawn-protection: false
+  keep-spawn-loaded: false
+  keep-spawn-loaded-range: 0
+tick-rates:
+  behavior:
+    villager:
+      acquirepoi: 2147483647
+      validatenearbypoi: 2147483647
+  container-update: 2147483647
+  dry-farmland: 2147483647
+  grass-spread: 2147483647
+  mob-spawner: 2147483647
+  sensor:
+    villager:
+      nearestbedsensor: 2147483647
+      nearestlivingentitysensor: 2147483647
+      playersensor: 2147483647
+      secondarypoisensor: 2147483647
+      villagerbabiessensor: 2147483647
+  wet-farmland: 2147483647
+unsupported-settings:
+  fix-invulnerable-end-crystal-exploit: true

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Farewell is an addon PaperMC plugin for BromineMC designed to sunset the server. -->
+
+<!-- Copyright (C) 2025 BromineMC -->
+<!-- Copyright (C) 2025 VidTu -->
+
+<!-- This program is free software: you can redistribute it and/or modify -->
+<!-- it under the terms of the GNU General Public License as published by -->
+<!-- the Free Software Foundation, either version 3 of the License, or -->
+<!-- (at your option) any later version. -->
+
+<!-- This program is distributed in the hope that it will be useful, -->
+<!-- but WITHOUT ANY WARRANTY; without even the implied warranty of -->
+<!-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the -->
+<!-- GNU General Public License for more details. -->
+
+<!-- You should have received a copy of the GNU General Public License -->
+<!-- along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
+
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<Configuration status="INFO" shutdownHook="disable">
+    <Appenders>
+        <TerminalConsole name="Console">
+            <PatternLayout pattern="%style{[%d{HH:mm:ss}]}{blue} %highlight{[%t/%level]}{FATAL=bright_red, ERROR=red, WARN=yellow, INFO=green, DEBUG=bright_white, TRACE=white}: %style{(%logger{0})}{cyan} %msg{nolookups}%n%xEx{full}" disableAnsi="false"/>
+        </TerminalConsole>
+        <RollingRandomAccessFile name="File" fileName="logs/latest.log" filePattern="logs/%d{yyyy-MM-dd}-%i.log.gz" immediateFlush="false">
+            <PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level]: (%logger{0}) %stripAnsi{%msg{nolookups}}%n%xEx{full}" disableAnsi="true"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <OnStartupTriggeringPolicy/>
+            </Policies>
+            <DefaultRolloverStrategy compressionLevel="9" max="100"/>
+        </RollingRandomAccessFile>
+        <Async name="Async">
+            <AppenderRef ref="Remap"/>
+        </Async>
+        <Rewrite name="Remap">
+            <StacktraceDeobfuscatingRewritePolicy/>
+            <AppenderRef ref="Data"/>
+        </Rewrite>
+        <Rewrite name="Data">
+            <ExtraClassInfoRewritePolicy/>
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="File" level="INFO"/>
+        </Rewrite>
+    </Appenders>
+    <Loggers>
+        <Root level="TRACE">
+            <Filters>
+                <MarkerFilter marker="NETWORK_PACKETS" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <RegexFilter regex="^You have used the Spigot command line EULA agreement flag\.$" useRawMsg="true" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <RegexFilter regex="^By using this setting you are indicating your agreement to Mojang's EULA \(https://aka\.ms/MinecraftEULA\)\.$" useRawMsg="true" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <RegexFilter regex="^If you do not agree to the above EULA please stop your server and remove this flag immediately\.$" useRawMsg="true" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <RegexFilter regex="^\*\*\*\* SERVER IS RUNNING IN OFFLINE/INSECURE MODE!$" useRawMsg="true" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <RegexFilter regex="^The server will make no attempt to authenticate usernames\. Beware\.$" useRawMsg="true" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <RegexFilter regex="^While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose\.$" useRawMsg="true" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <RegexFilter regex="^To change this, set &quot;online-mode&quot; to &quot;true&quot; in the server\.properties file\.$" useRawMsg="true" onMatch="DENY" onMismatch="NEUTRAL"/>
+            </Filters>
+            <AppenderRef ref="Async"/>
+        </Root>
+    </Loggers>
+</Configuration>
