@@ -409,6 +409,12 @@ final class Notifier implements Listener {
         openBook(player);
     }
 
+    @Contract(pure = true)
+    @Override
+    public String toString() {
+        return "Farewell/Notifier{}";
+    }
+
     /**
      * Opens the book.
      *

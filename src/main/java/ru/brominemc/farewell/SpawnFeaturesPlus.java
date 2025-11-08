@@ -130,11 +130,12 @@ final class SpawnFeaturesPlus implements Listener {
      * @param event Event to handle
      * @apiNote Do not call, called by Paper, internal use only
      */
+    @DoNotCall("Called by Paper")
     @ApiStatus.Internal
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
         // Check if pressing the comparator on a brick at spawn.
-        Block block = event.getClickedBlock();
+        Block block = event.getClickedBlock(); // Implicit NPE for 'event'
         if ((block == null) || !SpawnWorldHolder.SPAWN_WORLD.equals(block.getWorld()) ||
                 (block.getType() != Material.COMPARATOR) || (block.getRelative(BlockFace.DOWN).getType() != Material.BRICKS)) return;
 
@@ -219,5 +220,11 @@ final class SpawnFeaturesPlus implements Listener {
         player.playSound(LAUNCH_SOUND);
         player.setAllowFlight(true);
         player.setFlying(true);
+    }
+
+    @Contract(pure = true)
+    @Override
+    public String toString() {
+        return "Farewell/SpawnFeaturesPlus{}";
     }
 }
