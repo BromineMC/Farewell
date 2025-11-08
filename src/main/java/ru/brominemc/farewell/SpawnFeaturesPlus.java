@@ -185,11 +185,13 @@ final class SpawnFeaturesPlus implements Listener {
         Projectile entity = event.getEntity(); // Implicit NPE for 'event'
         if (!entity.getWorld().equals(SpawnWorldHolder.SPAWN_WORLD)) return;
 
+        // Check if on fire.
+        if (entity.getFireTicks() <= 0) return;
+
         // Cancel any stuff.
         event.setCancelled(true);
 
-        // Check if on fire and hit the campfire.
-        if (entity.getFireTicks() <= 0) return;
+        // Check if hit the campfire.
         Block block = event.getHitBlock();
         if ((block == null) || (block.getType() != Material.CAMPFIRE)) return;
 
