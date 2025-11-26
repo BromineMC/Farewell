@@ -30,9 +30,11 @@ val artifactVersion: String = libs.versions.paper.get()
 val mcVersion: String = artifactVersion.substringBefore('-')
 
 // Language.
-java.sourceCompatibility = JavaVersion.VERSION_21
-java.targetCompatibility = JavaVersion.VERSION_21
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+}
 
 // Metadata.
 group = "ru.brominemc.farewell"
