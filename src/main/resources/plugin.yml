@@ -21,7 +21,7 @@
 name: 'Farewell'
 version: '1.0'
 main: 'ru.brominemc.farewell.Farewell'
-description: 'Goodbye, BromineMC!'
+description: 'An addon PaperMC plugin for BromineMC designed to sunset the server.'
 author: 'BromineMC'
 contributors:
   - 'VidTu'

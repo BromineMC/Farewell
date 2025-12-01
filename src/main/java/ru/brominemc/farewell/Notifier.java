@@ -26,6 +26,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CompileTimeConstant;
 import com.google.errorprone.annotations.DoNotCall;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -38,17 +39,21 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.Nullable;
 import org.jspecify.annotations.NullMarked;
 
+import java.time.Instant;
 import java.util.Locale;
 
 /**
@@ -61,8 +66,27 @@ final class Notifier implements Listener {
     /**
      * An immutable list of languages that will be shown the Russian text.
      */
+    @CompileTimeConstant
     @Unmodifiable
     private static final ImmutableSet<String> RUSSIAN_LANGUAGES = ImmutableSet.of("ru", "ru-ru", "ru_ru", "rpr");
+
+    /**
+     * Sunsetting boss-bar start time, {@code November 30th, 2025 at 21:00 UTC}.
+     * Translates to {@code December 1st, 2025 at 00:00 MSK}.
+     * <p>
+     * Counted in milliseconds since {@code Instant#EPOCH}.
+     */
+    @CompileTimeConstant
+    private static final long SUNSET_START_EPOCH_MS = 1764536400000L;
+
+    /**
+     * Sunsetting boss-bar end time, {@code December 31st, 2025 at 21:00 UTC}.
+     * Translates to {@code January 1st, 2026 at 00:00 MSK}.
+     * <p>
+     * Counted in milliseconds since {@code Instant#EPOCH}.
+     */
+    @CompileTimeConstant
+    private static final long SUNSET_END_EPOCH_MS = 1767214800000L;
 
     /**
      * Book notifying about sunsetting the server in English.
@@ -297,6 +321,16 @@ final class Notifier implements Listener {
     }
 
     /**
+     * Sunsetting boss-bar at spawn in English.
+     */
+    private static final BossBar SUNSET_BAR_EN = BossBar.bossBar(Component.empty(), 0.0f, BossBar.Color.RED, BossBar.Overlay.PROGRESS);
+
+    /**
+     * Sunsetting boss-bar at spawn in Russian.
+     */
+    private static final BossBar SUNSET_BAR_RU = BossBar.bossBar(Component.empty(), 0.0f, BossBar.Color.RED, BossBar.Overlay.PROGRESS);
+
+    /**
      * Alleged spawn location. World is set in {@link #init()}, it is null on init.
      */
     private static final Location ALLEGED_SPAWN = new Location(null, 0.5d, 65.5d, 0.5d, 0.0f, 0.0f);
@@ -305,6 +339,12 @@ final class Notifier implements Listener {
      * Plugin instance.
      */
     private final Farewell plugin;
+    
+    /**
+     * Current boss-bar updating task, {@code null} if none.
+     */
+    @Nullable
+    private BukkitTask barTask;
 
     /**
      * Creates a new notifier.
@@ -327,6 +367,44 @@ final class Notifier implements Listener {
 
         // Initialize the handler.
         this.plugin.getServer().getPluginManager().registerEvents(this, this.plugin);
+
+        // Initialize the task.
+        BukkitTask barTask = this.barTask;
+        Preconditions.checkState(barTask == null, "Already started boss-bar task: %s", barTask);
+        this.barTask = this.plugin.getServer().getScheduler().runTaskTimerAsynchronously(this.plugin, () -> {
+            // Calculate and set the progress.
+            long current = Math.clamp(System.currentTimeMillis(), SUNSET_START_EPOCH_MS, SUNSET_END_EPOCH_MS);
+            float progress = (float) ((current - SUNSET_START_EPOCH_MS) / (double) (SUNSET_END_EPOCH_MS - SUNSET_START_EPOCH_MS));
+            SUNSET_BAR_EN.progress(progress);
+            SUNSET_BAR_RU.progress(progress);
+
+            // Calculate and set the label.
+            long left = (SUNSET_END_EPOCH_MS - current);
+            Component secondsLeft = Component.text(((left / 1000L) % 60L), NamedTextColor.RED);
+            Component minutesLeft = Component.text(((left / 60_000L) % 60L), NamedTextColor.RED);
+            Component hoursLeft = Component.text(((left / 3_600_000L) % 24L), NamedTextColor.RED);
+            Component daysLeft = Component.text((left / 86_400_000L), NamedTextColor.RED);
+            SUNSET_BAR_EN.name(Component.text("Sunsetting the server in: ", NamedTextColor.WHITE)
+                .append(daysLeft)
+                .append(Component.text("d. ", NamedTextColor.WHITE))
+                .append(hoursLeft)
+                .append(Component.text("h. ", NamedTextColor.WHITE))
+                .append(minutesLeft)
+                .append(Component.text("m. ", NamedTextColor.WHITE))
+                .append(secondsLeft)
+                .append(Component.text("s. ", NamedTextColor.WHITE))
+                .compact().compact());
+            SUNSET_BAR_RU.name(Component.text("Полное закрытие сервера через: ", NamedTextColor.WHITE)
+                .append(daysLeft)
+                .append(Component.text("дн. ", NamedTextColor.WHITE))
+                .append(hoursLeft)
+                .append(Component.text("ч. ", NamedTextColor.WHITE))
+                .append(minutesLeft)
+                .append(Component.text("м. ", NamedTextColor.WHITE))
+                .append(secondsLeft)
+                .append(Component.text("с. ", NamedTextColor.WHITE))
+                .compact().compact());
+        }, 0L, 0L);
     }
 
     /**
@@ -334,6 +412,13 @@ final class Notifier implements Listener {
      */
     @Contract(mutates = "this")
     void close() {
+        // Close the task.
+        BukkitTask alreadyTask = this.barTask;
+        this.barTask = null;
+        if (alreadyTask != null) {
+            alreadyTask.cancel();
+        }
+
         // Close the handler.
         HandlerList.unregisterAll(this);
 
@@ -351,9 +436,22 @@ final class Notifier implements Listener {
     @ApiStatus.Internal
     @EventHandler(ignoreCancelled = true)
     public void onJoin(PlayerJoinEvent event) {
-        // Schedule in one second to avoid being closing by the main plugin.
+        // Add the bar.
         Player player = event.getPlayer(); // Implicit NPE for 'event'
-        this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> openBook(player), Ticks.TICKS_PER_SECOND);
+        addBar(player);
+        
+        // Schedule more tasks a second later for proper initialization.
+        // This wouldn't be needed in 1.21+, but we're on 1.20.2.
+        this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
+            // Check if no longer at spawn.
+            if (!player.isConnected() || !SpawnWorldHolder.SPAWN_WORLD.equals(player.getWorld())) return;
+
+            // Open the book.
+            openBook(player);
+
+            // Add the bossbar.
+            addBar(player);
+        }, Ticks.TICKS_PER_SECOND);
     }
 
     /**
@@ -373,7 +471,7 @@ final class Notifier implements Listener {
         this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
             // Check if no longer at spawn.
             Player player = event.getPlayer();
-            if (!SpawnWorldHolder.SPAWN_WORLD.equals(player.getWorld())) return;
+            if (!player.isConnected() || !SpawnWorldHolder.SPAWN_WORLD.equals(player.getWorld())) return;
 
             // Clear old books.
             PlayerInventory inv = player.getInventory();
@@ -383,7 +481,31 @@ final class Notifier implements Listener {
             String language = player.locale().toString().toLowerCase(Locale.ROOT);
             ItemStack book = (RUSSIAN_LANGUAGES.contains(language) ? BOOK_ITEM_RU : BOOK_ITEM_EN);
             inv.addItem(book);
+
+            // Add the bossbar. (if not yet added)
+            addBar(player);
         }, Ticks.TICKS_PER_SECOND);
+    }
+
+    /**
+     * Adds or removes the boss-bar depending on the world changed.
+     *
+     * @param event Event to handle
+     * @apiNote Do not call, called by Paper, internal use only
+     */
+    @DoNotCall("Called by Paper")
+    @ApiStatus.Internal
+    @EventHandler(ignoreCancelled = true)
+    public void onWorld(PlayerChangedWorldEvent event) {
+        // Check if teleported to spawn.
+        Player player = event.getPlayer(); // Implicit NPE for 'event'
+        if (SpawnWorldHolder.SPAWN_WORLD.equals(player.getWorld())) {
+            // Add the bar if teleported to spawn.
+            addBar(player);
+        } else {
+            // Remove the bar if teleported from spawn.
+            removeBar(player);
+        }
     }
 
     /**
@@ -416,7 +538,7 @@ final class Notifier implements Listener {
     }
 
     /**
-     * Opens the book.
+     * Opens the sunsetting book.
      *
      * @param player Target player
      */
@@ -425,5 +547,31 @@ final class Notifier implements Listener {
         String language = player.locale().toString().toLowerCase(Locale.ROOT); // Implicit NPE for 'player'
         ItemStack book = (RUSSIAN_LANGUAGES.contains(language) ? BOOK_ITEM_RU : BOOK_ITEM_EN);
         player.openBook(book);
+    }
+
+    /**
+     * Adds the sunsetting boss-bar.
+     *
+     * @param player Target player
+     */
+    private static void addBar(Player player) {
+        // Remove previous bars to avoid duplication.
+        removeBar(player);
+
+        // NoboKik ahh language selection.
+        String language = player.locale().toString().toLowerCase(Locale.ROOT); // Implicit NPE for 'player'
+        BossBar bar = (RUSSIAN_LANGUAGES.contains(language) ? SUNSET_BAR_RU : SUNSET_BAR_EN);
+        player.showBossBar(bar);
+    }
+
+    /**
+     * Removes the sunsetting boss-bar.
+     *
+     * @param player Target player
+     */
+    private static void removeBar(Player player) {
+        // Removing both bars, cause language check is performed on bar adding.
+        player.hideBossBar(SUNSET_BAR_EN); // Implicit NPE for 'player'
+        player.hideBossBar(SUNSET_BAR_RU);
     }
 }
