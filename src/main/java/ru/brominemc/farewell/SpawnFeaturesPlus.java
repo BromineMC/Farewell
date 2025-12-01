@@ -26,10 +26,15 @@ import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CompileTimeConstant;
 import com.google.errorprone.annotations.DoNotCall;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.util.Ticks;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
@@ -44,11 +49,14 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.Nullable;
 import org.jspecify.annotations.NullMarked;
 
+import java.util.Arrays;
 import java.util.Random;
 import java.util.random.RandomGenerator;
 
@@ -89,6 +97,30 @@ final class SpawnFeaturesPlus implements Listener {
     private static final ItemStack FIREWORK = new ItemStack(Material.FIREWORK_ROCKET);
 
     /**
+     * Unicorn head. Cannot be taken off because you're a unicorn!
+     */
+    private static final ItemStack UNICORN = new ItemStack(Material.END_ROD);
+    static {
+        UNICORN.editMeta(meta -> {
+            meta.addEnchant(Enchantment.BINDING_CURSE, 1, /*ignoreLevelRestriction=*/true);
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        });
+    }
+
+    /**
+     * An array of all default block states.
+     */
+    private static final BlockData[] BLOCKS = Arrays.stream(Material.values())
+        .filter(m -> m.isBlock() && !m.isAir() && !m.isEmpty() && !m.isLegacy())
+        .map(Bukkit::createBlockData)
+        .toArray(BlockData[]::new);
+
+    /**
+     * Length of {@link #BLOCKS}.
+     */
+    private static final int BLOCKS_LENGTH = BLOCKS.length;
+
+    /**
      * The random number generator.
      */
     private static final RandomGenerator RNG = new Random();
@@ -97,6 +129,17 @@ final class SpawnFeaturesPlus implements Listener {
      * Plugin instance.
      */
     private final Farewell plugin;
+
+    /**
+     * Current projectile amount updating task, {@code null} if none.
+     */
+    @Nullable
+    private BukkitTask projectileTask;
+
+    /**
+     * Allowed amount of flying falling blocks.
+     */
+    private int allowedProjectiles = 50;
 
     /**
      * Creates a new notifier.
@@ -116,6 +159,14 @@ final class SpawnFeaturesPlus implements Listener {
     void init() {
         // Initialize the handler.
         this.plugin.getServer().getPluginManager().registerEvents(this, this.plugin);
+
+        // Initialize the task.
+        BukkitTask projectileTask = this.projectileTask;
+        Preconditions.checkState(projectileTask == null, "Already started projectile task task: %s", projectileTask);
+        this.projectileTask = this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, () -> {
+            // Increase amount of projectile by 10, but no more than 50 total.
+            this.allowedProjectiles = Math.clamp(this.allowedProjectiles + 10, 0, 50);
+        }, 10L * Ticks.TICKS_PER_SECOND, 10L * Ticks.TICKS_PER_SECOND);
     }
 
     /**
@@ -123,6 +174,13 @@ final class SpawnFeaturesPlus implements Listener {
      */
     @Contract(mutates = "this")
     void close() {
+        // Close the task.
+        BukkitTask projectileTask = this.projectileTask;
+        this.projectileTask = null;
+        if (projectileTask != null) {
+            projectileTask.cancel();
+        }
+
         // Close the handler.
         HandlerList.unregisterAll(this);
     }
@@ -204,7 +262,8 @@ final class SpawnFeaturesPlus implements Listener {
                 !player.getWorld().equals(SpawnWorldHolder.SPAWN_WORLD)) return;
 
         // Launch.
-        FallingBlock fall = SpawnWorldHolder.SPAWN_WORLD.spawn(block.getLocation().toCenterLocation().add(0.0d, 1.0d, 0.0d), FallingBlock.class, b -> {
+        Location location = block.getLocation().toCenterLocation().add(0.0d, 1.0d, 0.0d);
+        FallingBlock fall = SpawnWorldHolder.SPAWN_WORLD.spawn(location, FallingBlock.class, b -> {
             b.setBlockData(block.getBlockData());
             b.setDropItem(false);
             b.setCancelDrop(true);
@@ -221,6 +280,34 @@ final class SpawnFeaturesPlus implements Listener {
         }
         fall.addPassenger(player);
         player.playSound(LAUNCH_SOUND);
+        player.setFlySpeed(-1.0f); // lmfao
+
+        // The performance goes brbrbrbrbr.
+        int desiredProjectiles = RNG.nextInt(5, 20 + 1);
+        int usedProjectiles = Math.min(desiredProjectiles, this.allowedProjectiles);
+        if (usedProjectiles <= 0) return;
+        this.allowedProjectiles -= usedProjectiles;
+        for (int i = 0; i < usedProjectiles; i++) {
+            SpawnWorldHolder.SPAWN_WORLD.spawn(location, FallingBlock.class, b -> {
+                BlockData data = BLOCKS[RNG.nextInt(BLOCKS_LENGTH)];
+                b.setBlockData(data);
+                b.setDropItem(false);
+                b.setCancelDrop(true);
+                b.setVelocity(new Vector(
+                        RNG.nextDouble(-1.0d, 1.0d),
+                        RNG.nextDouble(0.5d, 2.0d),
+                        RNG.nextDouble(-1.0d, 1.0d)
+                ));
+            });
+        }
+
+        // Show the stats in a few ticks to override the LShift dismount message.
+        this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> player.sendActionBar(Component.text(usedProjectiles + "/" + desiredProjectiles + " -> " + this.allowedProjectiles, NamedTextColor.RED)), 2L);
+
+        // Ебать ты единорог!
+        if (usedProjectiles != 20) return;
+        player.getInventory().setHelmet(UNICORN);
+        player.setHealth(player.getHealth() - 1);
     }
 
     /**
@@ -274,6 +361,9 @@ final class SpawnFeaturesPlus implements Listener {
     @Contract(pure = true)
     @Override
     public String toString() {
-        return "Farewell/SpawnFeaturesPlus{}";
+        return "Farewell/SpawnFeaturesPlus{" +
+            "projectileTask=" + this.projectileTask +
+            ", allowedProjectiles=" + this.allowedProjectiles +
+            '}';
     }
 }

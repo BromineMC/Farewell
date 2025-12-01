@@ -404,10 +404,10 @@ final class Notifier implements Listener {
     @Contract(mutates = "this")
     void close() {
         // Close the task.
-        BukkitTask alreadyTask = this.barTask;
+        BukkitTask barTask = this.barTask;
         this.barTask = null;
-        if (alreadyTask != null) {
-            alreadyTask.cancel();
+        if (barTask != null) {
+            barTask.cancel();
         }
 
         // Close the handler.
@@ -522,7 +522,9 @@ final class Notifier implements Listener {
     @Contract(pure = true)
     @Override
     public String toString() {
-        return "Farewell/Notifier{}";
+        return "Farewell/Notifier{" +
+            "barTask=" + this.barTask +
+            '}';
     }
 
     /**
