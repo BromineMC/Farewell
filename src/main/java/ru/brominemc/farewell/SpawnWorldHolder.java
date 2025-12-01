@@ -23,6 +23,7 @@
 package ru.brominemc.farewell;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.NullMarked;
@@ -39,6 +40,11 @@ final class SpawnWorldHolder {
      * The spawn world.
      */
     static final World SPAWN_WORLD = Bukkit.getWorlds().getFirst();
+
+    /**
+     * The spawn location.
+     */
+    static final Location SPAWN = new Location(SPAWN_WORLD, 0.5d, 65.5d, 0.5d, 0.0f, 0.0f);
 
     /**
      * An instance of this class cannot be created.

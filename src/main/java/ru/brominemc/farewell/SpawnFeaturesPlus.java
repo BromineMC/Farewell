@@ -26,6 +26,7 @@ import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CompileTimeConstant;
 import com.google.errorprone.annotations.DoNotCall;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.util.Ticks;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -38,6 +39,8 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -218,8 +221,54 @@ final class SpawnFeaturesPlus implements Listener {
         }
         fall.addPassenger(player);
         player.playSound(LAUNCH_SOUND);
-        player.setAllowFlight(true);
-        player.setFlying(true);
+    }
+
+    /**
+     * Enables the flight on join.
+     *
+     * @param event Event to handle
+     * @apiNote Do not call, called by Paper, internal use only
+     */
+    @DoNotCall("Called by Paper")
+    @ApiStatus.Internal
+    @EventHandler(ignoreCancelled = true)
+    public void onJoin(PlayerJoinEvent event) {
+        // Schedule more tasks a second later for proper initialization.
+        // This wouldn't be needed in 1.21+, but we're on 1.20.2.
+        Player player = event.getPlayer(); // Implicit NPE for 'event'
+        this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
+            // Check if no longer at spawn.
+            if (!player.isConnected() || !SpawnWorldHolder.SPAWN_WORLD.equals(player.getWorld())) return;
+
+            // Enable the flight.
+            player.setAllowFlight(true);
+            player.setFlying(true);
+        }, Ticks.TICKS_PER_SECOND);
+    }
+
+    /**
+     * Enables the flight on spawn-teleport.
+     *
+     * @param event Event to handle
+     * @apiNote Do not call, called by Paper, internal use only
+     */
+    @DoNotCall("Called by Paper")
+    @ApiStatus.Internal
+    @EventHandler(ignoreCancelled = true)
+    public void onTeleport(PlayerTeleportEvent event) {
+        // Check if teleported to spawn.
+        if (!SpawnWorldHolder.SPAWN.equals(event.getTo())) return; // Implicit NPE for 'event'
+
+        // Schedule a second later.
+        this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
+            // Check if no longer at spawn.
+            Player player = event.getPlayer();
+            if (!player.isConnected() || !SpawnWorldHolder.SPAWN_WORLD.equals(player.getWorld())) return;
+
+            // Enable the flight.
+            player.setAllowFlight(true);
+            player.setFlying(true);
+        }, Ticks.TICKS_PER_SECOND);
     }
 
     @Contract(pure = true)

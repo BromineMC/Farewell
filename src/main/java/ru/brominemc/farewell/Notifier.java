@@ -33,7 +33,6 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.util.Ticks;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -331,11 +330,6 @@ final class Notifier implements Listener {
     private static final BossBar SUNSET_BAR_RU = BossBar.bossBar(Component.empty(), 0.0f, BossBar.Color.RED, BossBar.Overlay.PROGRESS);
 
     /**
-     * Alleged spawn location. World is set in {@link #init()}, it is null on init.
-     */
-    private static final Location ALLEGED_SPAWN = new Location(null, 0.5d, 65.5d, 0.5d, 0.0f, 0.0f);
-
-    /**
      * Plugin instance.
      */
     private final Farewell plugin;
@@ -362,9 +356,6 @@ final class Notifier implements Listener {
      */
     @Contract(mutates = "this")
     void init() {
-        // Set the world.
-        ALLEGED_SPAWN.setWorld(SpawnWorldHolder.SPAWN_WORLD);
-
         // Initialize the handler.
         this.plugin.getServer().getPluginManager().registerEvents(this, this.plugin);
 
@@ -421,13 +412,10 @@ final class Notifier implements Listener {
 
         // Close the handler.
         HandlerList.unregisterAll(this);
-
-        // Unset the world.
-        ALLEGED_SPAWN.setWorld(null);
     }
 
     /**
-     * Shows the book on join.
+     * Shows the book and the boss-bar on join.
      *
      * @param event Event to handle
      * @apiNote Do not call, called by Paper, internal use only
@@ -455,7 +443,7 @@ final class Notifier implements Listener {
     }
 
     /**
-     * Adds the book on spawn-teleport.
+     * Adds the book and the boss-bar on spawn-teleport.
      *
      * @param event Event to handle
      * @apiNote Do not call, called by Paper, internal use only
@@ -465,7 +453,7 @@ final class Notifier implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onTeleport(PlayerTeleportEvent event) {
         // Check if teleported to spawn.
-        if (!ALLEGED_SPAWN.equals(event.getTo())) return; // Implicit NPE for 'event'
+        if (!SpawnWorldHolder.SPAWN.equals(event.getTo())) return; // Implicit NPE for 'event'
 
         // Schedule a second later.
         this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
